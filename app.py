@@ -45,7 +45,7 @@ try:
             for row in rows:
                 REPORTE += '<tr>'
                 for column in row:
-                    REPORTE += f'''<td>{column}</td>'''
+                    REPORTE += f'<td>{column}</td>'
                 REPORTE += '</tr>'
             REPORTE += '''
                 </tbody>
@@ -98,7 +98,7 @@ try:
             for row in rows:
                 REPORTE += '<tr>'
                 for column in row:
-                    REPORTE += f'''<td>{column}</td>'''
+                    REPORTE += f'<td>{column}</td>'
                 REPORTE += '</tr>'
             REPORTE += '''
                 </tbody>
@@ -138,7 +138,7 @@ try:
             for row in rows:
                 REPORTE += '<tr>'
                 for column in row:
-                    REPORTE += f'''<td>{column}</td>'''
+                    REPORTE += f'<td>{column}</td>'
                 REPORTE += '</tr>'
             REPORTE += '''
                 </tbody>
@@ -187,7 +187,7 @@ try:
             for row in rows:
                 REPORTE += '<tr>'
                 for column in row:
-                    REPORTE += f'''<td>{column}</td>'''
+                    REPORTE += f'<td>{column}</td>'
                 REPORTE += '</tr>'
             REPORTE += '''
                 </tbody>
@@ -207,7 +207,7 @@ try:
             WHERE o.CLIENTE_ID_CLIENTE = c.ID_CLIENTE
             AND o.PRODUCTO_ID_PRODUCTO = pro.ID_PRODUCTO
             AND c.PAIS_ID_PAIS = p.ID_PAIS
-            GROUP BY p.ID_PAIS, p.NOMBRE ORDER BY monto DESC
+            GROUP BY p.ID_PAIS, p.NOMBRE ORDER BY monto ASC
             FETCH FIRST 5 ROWS ONLY
             '''
 
@@ -228,7 +228,224 @@ try:
             for row in rows:
                 REPORTE += '<tr>'
                 for column in row:
-                    REPORTE += f'''<td>{column}</td>'''
+                    REPORTE += f'<td>{column}</td>'
+                REPORTE += '</tr>'
+            REPORTE += '''
+                </tbody>
+            </table>
+            '''
+            return REPORTE
+        except Exception as err:
+            print(err)
+    
+    @app.route('/consulta6', methods = ['GET'])
+    def consulta6():
+        try:
+            cur = conexion.cursor()
+            consulta = '''
+            (SELECT cat.NOMBRE, SUM(o.CANTIDAD) as cantidad
+            FROM ORDEN o, PRODUCTO pro, CATEGORIA cat
+            WHERE o.PRODUCTO_ID_PRODUCTO = pro.ID_PRODUCTO
+            AND pro.CATEGORIA_ID_CATEGORIA = cat.ID_CATEGORIA
+            GROUP BY cat.NOMBRE
+            ORDER BY cantidad DESC
+            FETCH FIRST 1 ROWS ONLY)
+            UNION ALL
+            (SELECT cat.NOMBRE, SUM(o.CANTIDAD) as cantidad
+            FROM ORDEN o, PRODUCTO pro, CATEGORIA cat
+            WHERE o.PRODUCTO_ID_PRODUCTO = pro.ID_PRODUCTO
+            AND pro.CATEGORIA_ID_CATEGORIA = cat.ID_CATEGORIA
+            GROUP BY cat.NOMBRE
+            ORDER BY cantidad ASC
+            FETCH FIRST 1 ROWS ONLY )
+            '''
+
+            cur.execute(consulta)
+            rows = cur.fetchall()
+            REPORTE = ''
+            REPORTE += '''
+            <table border = '1'>
+                <thead>
+                    <tr>
+                        <th>CATEGORIA</th>
+                        <th>CANTIDAD UNIDADES</th>
+                    </tr>
+                </thead>
+                <tbody>
+            '''
+            for row in rows:
+                REPORTE += '<tr>'
+                for column in row:
+                    REPORTE += f'<td>{column}</td>'
+                REPORTE += '</tr>'
+            REPORTE += '''
+                </tbody>
+            </table>
+            '''
+            return REPORTE
+        except Exception as err:
+            print(err)
+    
+    @app.route('/consulta7', methods = ['GET'])
+    def consulta7():
+        try:
+            cur = conexion.cursor()
+            consulta = '''
+            SELECT p.NOMBRE, cat.NOMBRE, SUM(o.CANTIDAD) as cantidad
+            FROM PAIS p, CATEGORIA cat, ORDEN o, PRODUCTO pro, CLIENTE c
+            WHERE o.PRODUCTO_ID_PRODUCTO = pro.ID_PRODUCTO
+            AND pro.CATEGORIA_ID_CATEGORIA = cat.ID_CATEGORIA
+            AND o.CLIENTE_ID_CLIENTE = c.ID_CLIENTE
+            AND c.PAIS_ID_PAIS = p.ID_PAIS
+            GROUP BY p.NOMBRE, cat.NOMBRE ORDER BY cantidad DESC 
+            '''
+
+            cur.execute(consulta)
+            rows = cur.fetchall()
+            REPORTE = ''
+            REPORTE += '''
+            <table border = '1'>
+                <thead>
+                    <tr>
+                        <th>PAIS</th>
+                        <th>CATEGORIA</th>
+                        <th>CANTIDAD</th>
+                    </tr>
+                </thead>
+                <tbody>
+            '''
+            for row in rows:
+                REPORTE += '<tr>'
+                for column in row:
+                    REPORTE += f'<td>{column}</td>'
+                REPORTE += '</tr>'
+            REPORTE += '''
+                </tbody>
+            </table>
+            '''
+            return REPORTE
+        except Exception as err:
+            print(err)
+    
+    @app.route('/consulta8', methods = ['GET'])
+    def consulta8():
+        try:
+            cur = conexion.cursor()
+            consulta = '''
+            SELECT EXTRACT(MONTH FROM o.FECHA_ORDEN) as mes, SUM(o.CANTIDAD * pro.PRECIO) as monto
+            FROM ORDEN o, VENDEDOR v, PRODUCTO pro, PAIS p
+            WHERE o.VENDEDOR_ID_VENDEDOR = v.ID_VENDEDOR
+            AND o.PRODUCTO_ID_PRODUCTO = pro.ID_PRODUCTO
+            AND v.PAIS_ID_PAIS = p.ID_PAIS
+            AND p.NOMBRE = 'Inglaterra'
+            GROUP BY EXTRACT(MONTH FROM o.FECHA_ORDEN) ORDER BY mes ASC
+            '''
+
+            cur.execute(consulta)
+            rows = cur.fetchall()
+            REPORTE = ''
+            REPORTE += '''
+            <table border = '1'>
+                <thead>
+                    <tr>
+                        <th>MES</th>
+                        <th>MONTO</th>
+                    </tr>
+                </thead>
+                <tbody>
+            '''
+            for row in rows:
+                REPORTE += '<tr>'
+                for column in row:
+                    REPORTE += f'<td>{column}</td>'
+                REPORTE += '</tr>'
+            REPORTE += '''
+                </tbody>
+            </table>
+            '''
+            return REPORTE
+        except Exception as err:
+            print(err)
+    
+    @app.route('/consulta9', methods = ['GET'])
+    def consulta9():
+        try:
+            cur = conexion.cursor()
+            consulta = '''
+            (SELECT EXTRACT(MONTH FROM o.FECHA_ORDEN) AS mes, SUM(o.CANTIDAD * pro.PRECIO) AS monto
+            FROM ORDEN o, PRODUCTO pro
+            WHERE o.PRODUCTO_ID_PRODUCTO = pro.ID_PRODUCTO
+            GROUP BY EXTRACT(MONTH FROM o.FECHA_ORDEN) ORDER BY monto DESC
+            FETCH FIRST 1 ROWS ONLY)
+            UNION ALL
+            (SELECT EXTRACT(MONTH FROM o.FECHA_ORDEN) AS mes, SUM(o.CANTIDAD * pro.PRECIO) AS monto
+            FROM ORDEN o, PRODUCTO pro
+            WHERE o.PRODUCTO_ID_PRODUCTO = pro.ID_PRODUCTO
+            GROUP BY EXTRACT(MONTH FROM o.FECHA_ORDEN) ORDER BY monto ASC
+            FETCH FIRST 1 ROWS ONLY)
+            '''
+
+            cur.execute(consulta)
+            rows = cur.fetchall()
+            REPORTE = ''
+            REPORTE += '''
+            <table border = '1'>
+                <thead>
+                    <tr>
+                        <th>MES</th>
+                        <th>MONTO</th>
+                    </tr>
+                </thead>
+                <tbody>
+            '''
+            for row in rows:
+                REPORTE += '<tr>'
+                for column in row:
+                    REPORTE += f'<td>{column}</td>'
+                REPORTE += '</tr>'
+            REPORTE += '''
+                </tbody>
+            </table>
+            '''
+            return REPORTE
+        except Exception as err:
+            print(err)
+    
+    @app.route('/consulta10', methods = ['GET'])
+    def consulta10():
+        try:
+            cur = conexion.cursor()
+            consulta = '''
+            SELECT pro.ID_PRODUCTO, pro.NOMBRE, SUM(o.CANTIDAD * pro.PRECIO) AS monto
+            FROM PRODUCTO pro, ORDEN o, CATEGORIA cat
+            WHERE o.PRODUCTO_ID_PRODUCTO = pro.ID_PRODUCTO
+            AND pro.CATEGORIA_ID_CATEGORIA = cat.ID_CATEGORIA
+            AND cat.NOMBRE = 'Deportes'
+            GROUP BY pro.ID_PRODUCTO, pro.NOMBRE ORDER BY pro.ID_PRODUCTO ASC
+            '''
+
+            cur.execute(consulta)
+            rows = cur.fetchall()
+            REPORTE = ''
+            REPORTE += '''
+            <table border = '1'>
+                <thead>
+                    <tr>
+                        <th>NO</th>
+                        <th>ID_PRODUCTO</th>
+                        <th>NOMBRE</th>
+                        <th>MONTO</th>
+                    </tr>
+                </thead>
+                <tbody>
+            '''
+            contador = 0
+            for row in rows:
+                REPORTE += '<tr>'
+                contador += 1
+                REPORTE += f'<td>{contador}</td>'
+                for column in row:
+                    REPORTE += f'<td>{column}</td>'
                 REPORTE += '</tr>'
             REPORTE += '''
                 </tbody>
